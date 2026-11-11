@@ -241,20 +241,32 @@ function MenuSection({
 }) {
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
   const [itemName, setItemName] = useState('')
   const [itemPrice, setItemPrice] = useState('')
   const createMenuItem = useMutation({
-    mutationFn: () =>
-      apiClient.request('/menu/{restaurante_id}', 'post', {
-        path: { restaurante_id: restaurantId! },
-        body: { nome: itemName.trim(), preco: Number(itemPrice) },
-      }),
+    mutationFn: () => {
+      const body = { nome: itemName.trim(), preco: Number(itemPrice) }
+      return editingItem
+        ? apiClient.request('/menu/{restaurante_id}/{item_id}', 'put', {
+            path: {
+              restaurante_id: restaurantId!,
+              item_id: editingItem.id,
+            },
+            body,
+          })
+        : apiClient.request('/menu/{restaurante_id}', 'post', {
+            path: { restaurante_id: restaurantId! },
+            body,
+          })
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ['restaurant-menu', restaurantId],
       })
       setItemName('')
       setItemPrice('')
+      setEditingItem(null)
       setIsModalOpen(false)
     },
   })
@@ -300,9 +312,16 @@ function MenuSection({
         ) : items.length > 0 ? (
           <div className="divide-y divide-slate-100">
             {items.map((item) => (
-              <div
+              <button
                 key={item.id}
-                className="flex items-center justify-between gap-4 px-5 py-4 sm:px-6"
+                type="button"
+                onClick={() => {
+                  setEditingItem(item)
+                  setItemName(item.name)
+                  setItemPrice(item.price)
+                  setIsModalOpen(true)
+                }}
+                className="flex w-full cursor-pointer items-center justify-between gap-4 px-5 py-4 text-left transition hover:bg-slate-50 sm:px-6"
               >
                 <p className="text-sm font-medium text-slate-800">
                   {item.name}
@@ -310,7 +329,7 @@ function MenuSection({
                 <p className="shrink-0 text-sm font-semibold text-[#e9513b]">
                   {formatBRLFromCents(item.price)}
                 </p>
-              </div>
+              </button>
             ))}
           </div>
         ) : (
@@ -337,10 +356,12 @@ function MenuSection({
             className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl sm:p-6"
           >
             <h3 className="text-lg font-semibold text-slate-900">
-              Novo item do menu
+              {editingItem ? 'Editar item do menu' : 'Novo item do menu'}
             </h3>
             <p className="mt-1 text-sm text-slate-500">
-              Adicione um item disponível para os clientes.
+              {editingItem
+                ? 'Atualize os dados deste item do menu.'
+                : 'Adicione um item disponível para os clientes.'}
             </p>
 
             <label
@@ -387,7 +408,12 @@ function MenuSection({
             <div className="mt-7 flex justify-end gap-3">
               <button
                 type="button"
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => {
+                  setIsModalOpen(false)
+                  setEditingItem(null)
+                  setItemName('')
+                  setItemPrice('')
+                }}
                 className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
               >
                 Cancelar
@@ -399,7 +425,11 @@ function MenuSection({
                 }
                 className="rounded-xl bg-[#ff6048] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#e9513b] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {createMenuItem.isPending ? 'Salvando...' : 'Adicionar item'}
+                {createMenuItem.isPending
+                  ? 'Salvando...'
+                  : editingItem
+                    ? 'Salvar alterações'
+                    : 'Adicionar item'}
               </button>
             </div>
           </form>
