@@ -52,6 +52,8 @@ type ResponseBody<TOperation> = TOperation extends {
 
 type TokenResponse = {
   access_token: string
+  expires_in?: number
+  refresh_token?: string
 }
 
 type RequestOptions<TOperation> = {
@@ -79,10 +81,16 @@ export class ApiError extends Error {
 }
 
 export class ApiClient {
+  private static readonly accessTokenKey = 'comida.access_token'
+  private static readonly accessTokenExpiresAtKey =
+    'comida.access_token_expires_at'
+  private static readonly refreshTokenKey = 'comida.refresh_token'
+  private static readonly refreshBufferMs = 60_000
   private readonly baseUrl: string
   private readonly authUrl: string
   private readonly authClientId: string
   private accessTokenPromise?: Promise<string | null>
+  private refreshTokenPromise?: Promise<string>
 
   constructor(baseUrl = import.meta.env.VITE_API_URL) {
     if (!baseUrl) {
@@ -145,7 +153,7 @@ export class ApiClient {
     const responseBody = await this.parseResponseBody(response)
 
     if (response.status === 401) {
-      sessionStorage.removeItem('comida.access_token')
+      this.clearStoredTokens()
       this.redirectToLogin()
     }
 
@@ -161,7 +169,7 @@ export class ApiClient {
   }
 
   logout(): void {
-    sessionStorage.removeItem('comida.access_token')
+    this.clearStoredTokens()
     sessionStorage.removeItem('comida.auth_state')
     sessionStorage.removeItem('comida.pkce_verifier')
 
@@ -199,11 +207,24 @@ export class ApiClient {
 
   private async getAccessToken(): Promise<string | null> {
     this.accessTokenPromise ??= this.loadAccessToken()
-    return this.accessTokenPromise
+    const accessToken = await this.accessTokenPromise
+    if (!accessToken || !this.isAccessTokenExpiringSoon()) {
+      return accessToken
+    }
+
+    const refreshToken = sessionStorage.getItem(ApiClient.refreshTokenKey)
+    if (!refreshToken) return accessToken
+
+    this.refreshTokenPromise ??= this.refreshAccessToken(refreshToken)
+    try {
+      return await this.refreshTokenPromise
+    } finally {
+      this.refreshTokenPromise = undefined
+    }
   }
 
   private async loadAccessToken(): Promise<string | null> {
-    const storedToken = sessionStorage.getItem('comida.access_token')
+    const storedToken = sessionStorage.getItem(ApiClient.accessTokenKey)
     if (storedToken) return storedToken
 
     const params = new URLSearchParams(window.location.search)
@@ -240,11 +261,71 @@ export class ApiClient {
       )
     }
 
-    sessionStorage.setItem('comida.access_token', tokenBody.access_token)
+    this.storeTokenResponse(tokenBody)
     sessionStorage.removeItem('comida.auth_state')
     sessionStorage.removeItem('comida.pkce_verifier')
     window.history.replaceState({}, document.title, window.location.pathname)
     return tokenBody.access_token
+  }
+
+  private async refreshAccessToken(refreshToken: string): Promise<string> {
+    const tokenUrl = new URL(
+      '/realms/master/protocol/openid-connect/token',
+      this.authUrl,
+    )
+    const tokenResponse = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: this.authClientId,
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+      }),
+    })
+    const tokenBody = (await tokenResponse.json()) as
+      TokenResponse | { error: string }
+    if (!tokenResponse.ok || !('access_token' in tokenBody)) {
+      this.clearStoredTokens()
+      this.redirectToLogin()
+      throw new Error(
+        `Token refresh failed: ${'error' in tokenBody ? tokenBody.error : 'invalid token response'}.`,
+      )
+    }
+
+    this.storeTokenResponse(tokenBody)
+    return tokenBody.access_token
+  }
+
+  private storeTokenResponse(tokenResponse: TokenResponse): void {
+    sessionStorage.setItem(ApiClient.accessTokenKey, tokenResponse.access_token)
+    if (tokenResponse.expires_in !== undefined) {
+      sessionStorage.setItem(
+        ApiClient.accessTokenExpiresAtKey,
+        String(Date.now() + tokenResponse.expires_in * 1000),
+      )
+    }
+    if (tokenResponse.refresh_token) {
+      sessionStorage.setItem(
+        ApiClient.refreshTokenKey,
+        tokenResponse.refresh_token,
+      )
+    }
+  }
+
+  private isAccessTokenExpiringSoon(): boolean {
+    const expiresAt = Number(
+      sessionStorage.getItem(ApiClient.accessTokenExpiresAtKey),
+    )
+    return (
+      Number.isFinite(expiresAt) &&
+      expiresAt - Date.now() <= ApiClient.refreshBufferMs
+    )
+  }
+
+  private clearStoredTokens(): void {
+    sessionStorage.removeItem(ApiClient.accessTokenKey)
+    sessionStorage.removeItem(ApiClient.accessTokenExpiresAtKey)
+    sessionStorage.removeItem(ApiClient.refreshTokenKey)
   }
 
   private createCodeVerifier(): string {
