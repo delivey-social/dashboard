@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Link } from '@tanstack/react-router'
 import { ReceiptIcon, StoreIcon } from './icons'
 import type { Order, Restaurant } from './types'
 
@@ -65,9 +66,12 @@ export function RestaurantsCard({
             Seus parceiros conectados
           </p>
         </div>
-        <button className="text-xs font-semibold text-[#e9513b]">
+        <Link
+          to="/restaurantes"
+          className="text-xs font-semibold text-[#e9513b]"
+        >
           Ver todos
-        </button>
+        </Link>
       </div>
       {loading ? (
         <div className="mt-7 space-y-4">

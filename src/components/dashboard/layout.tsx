@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Link } from '@tanstack/react-router'
 import { apiClient } from '#/api'
 import {
   BellIcon,
@@ -9,6 +10,7 @@ import {
   StoreIcon,
   UsersIcon,
 } from './icons'
+import clsx from 'clsx'
 
 export function DashboardHeader() {
   return (
@@ -54,8 +56,12 @@ export function Sidebar() {
           Espaço de trabalho
         </p>
         <nav className="space-y-1">
-          <NavItem icon={<GridIcon />} label="Visão geral" active />
-          <NavItem icon={<StoreIcon />} label="Restaurantes" />
+          <NavItem icon={<GridIcon />} label="Visão geral" to="/" />
+          <NavItem
+            icon={<StoreIcon />}
+            label="Restaurantes"
+            to="/restaurantes"
+          />
           <NavItem icon={<ReceiptIcon />} label="Pedidos" />
         </nav>
         <p className="mb-3 mt-9 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
@@ -99,18 +105,36 @@ export function Sidebar() {
 function NavItem({
   icon,
   label,
-  active = false,
+  to,
 }: {
   icon: ReactNode
   label: string
-  active?: boolean
+  to?: '/' | '/restaurantes'
 }) {
+  const className =
+    'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-500 transition hover:bg-slate-50 hover:text-slate-800'
+  const isActive = to ? window.location.pathname === to : false
+
+  if (!to) {
+    return (
+      <button type="button" className={className}>
+        {icon}
+        {label}
+      </button>
+    )
+  }
+
   return (
-    <button
-      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${active ? 'bg-[#fff0ec] text-[#e9513b]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}
+    <Link
+      to={to}
+      activeOptions={{ exact: true }}
+      className={clsx(
+        className,
+        isActive && 'hover:bg-orange-100! bg-orange-50 text-orange-400!',
+      )}
     >
       {icon}
       {label}
-    </button>
+    </Link>
   )
 }
