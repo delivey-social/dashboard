@@ -11,7 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RestaurantesRouteImport } from './routes/restaurantes'
-import { Route as RestauratesManterRouteImport } from './routes/restaurates/manter'
+import { Route as RestauratesManterChar123IdChar125RouteImport } from './routes/restaurates/manter.{-$id}'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -23,40 +23,41 @@ const RestaurantesRoute = RestaurantesRouteImport.update({
   path: '/restaurantes',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RestauratesManterRoute = RestauratesManterRouteImport.update({
-  id: '/restaurates/manter',
-  path: '/restaurates/manter',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const RestauratesManterChar123IdChar125Route =
+  RestauratesManterChar123IdChar125RouteImport.update({
+    id: '/restaurates/manter/{-$id}',
+    path: '/restaurates/manter/{-$id}',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/restaurantes': typeof RestaurantesRoute
-  '/restaurates/manter': typeof RestauratesManterRoute
+  '/restaurates/manter/{-$id}': typeof RestauratesManterChar123IdChar125Route
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/restaurantes': typeof RestaurantesRoute
-  '/restaurates/manter': typeof RestauratesManterRoute
+  '/restaurates/manter/{-$id}': typeof RestauratesManterChar123IdChar125Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/restaurantes': typeof RestaurantesRoute
-  '/restaurates/manter': typeof RestauratesManterRoute
+  '/restaurates/manter/{-$id}': typeof RestauratesManterChar123IdChar125Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/restaurantes' | '/restaurates/manter'
+  fullPaths: '/' | '/restaurantes' | '/restaurates/manter/{-$id}'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/restaurantes' | '/restaurates/manter'
-  id: '__root__' | '/' | '/restaurantes' | '/restaurates/manter'
+  to: '/' | '/restaurantes' | '/restaurates/manter/{-$id}'
+  id: '__root__' | '/' | '/restaurantes' | '/restaurates/manter/{-$id}'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RestaurantesRoute: typeof RestaurantesRoute
-  RestauratesManterRoute: typeof RestauratesManterRoute
+  RestauratesManterChar123IdChar125Route: typeof RestauratesManterChar123IdChar125Route
 }
 
 declare module '@tanstack/react-router' {
@@ -75,11 +76,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RestaurantesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/restaurates/manter': {
-      id: '/restaurates/manter'
-      path: '/restaurates/manter'
-      fullPath: '/restaurates/manter'
-      preLoaderRoute: typeof RestauratesManterRouteImport
+    '/restaurates/manter/{-$id}': {
+      id: '/restaurates/manter/{-$id}'
+      path: '/restaurates/manter/{-$id}'
+      fullPath: '/restaurates/manter/{-$id}'
+      preLoaderRoute: typeof RestauratesManterChar123IdChar125RouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -88,7 +89,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RestaurantesRoute: RestaurantesRoute,
-  RestauratesManterRoute: RestauratesManterRoute,
+  RestauratesManterChar123IdChar125Route:
+    RestauratesManterChar123IdChar125Route,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

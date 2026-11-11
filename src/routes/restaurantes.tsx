@@ -61,8 +61,10 @@ function RestaurantsPage() {
             ) : restaurants.length > 0 ? (
               <div className="divide-y divide-slate-100">
                 {restaurants.map((restaurant) => (
-                  <div
+                  <Link
                     key={restaurant.id}
+                    to="/restaurates/manter/{-$id}"
+                    params={{ id: restaurant.id }}
                     className="flex items-center gap-3 px-5 py-4 transition hover:bg-slate-50 sm:px-6"
                   >
                     <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#fff0ec] font-semibold text-[#e9513b]">
@@ -77,7 +79,7 @@ function RestaurantsPage() {
                       </p>
                     </div>
                     <span className="size-2 rounded-full bg-emerald-400" />
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (
