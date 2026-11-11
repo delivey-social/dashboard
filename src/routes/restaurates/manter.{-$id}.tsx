@@ -241,7 +241,9 @@ function MenuSection({
 }) {
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
+  const [deletingItem, setDeletingItem] = useState<MenuItem | null>(null)
   const [itemName, setItemName] = useState('')
   const [itemPrice, setItemPrice] = useState('')
   const createMenuItem = useMutation({
@@ -268,6 +270,22 @@ function MenuSection({
       setItemPrice('')
       setEditingItem(null)
       setIsModalOpen(false)
+    },
+  })
+  const deleteMenuItem = useMutation({
+    mutationFn: () =>
+      apiClient.request('/menu/{restaurante_id}/{item_id}', 'delete', {
+        path: {
+          restaurante_id: restaurantId!,
+          item_id: deletingItem!.id,
+        },
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['restaurant-menu', restaurantId],
+      })
+      setDeletingItem(null)
+      setIsDeleteModalOpen(false)
     },
   })
 
@@ -312,24 +330,40 @@ function MenuSection({
         ) : items.length > 0 ? (
           <div className="divide-y divide-slate-100">
             {items.map((item) => (
-              <button
+              <div
                 key={item.id}
-                type="button"
-                onClick={() => {
-                  setEditingItem(item)
-                  setItemName(item.name)
-                  setItemPrice(item.price)
-                  setIsModalOpen(true)
-                }}
-                className="flex w-full cursor-pointer items-center justify-between gap-4 px-5 py-4 text-left transition hover:bg-slate-50 sm:px-6"
+                className="flex items-center gap-4 px-5 py-4 transition hover:bg-slate-50 sm:px-6"
               >
-                <p className="text-sm font-medium text-slate-800">
-                  {item.name}
-                </p>
-                <p className="shrink-0 text-sm font-semibold text-[#e9513b]">
-                  {formatBRLFromCents(item.price)}
-                </p>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingItem(item)
+                    setItemName(item.name)
+                    setItemPrice(item.price)
+                    setIsModalOpen(true)
+                  }}
+                  className="flex min-w-0 flex-1 cursor-pointer items-center justify-between gap-4 text-left"
+                >
+                  <p className="truncate text-sm font-medium text-slate-800">
+                    {item.name}
+                  </p>
+                  <p className="shrink-0 text-sm font-semibold text-[#e9513b]">
+                    {formatBRLFromCents(item.price)}
+                  </p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeletingItem(item)
+                    setIsDeleteModalOpen(true)
+                  }}
+                  aria-label={`Excluir ${item.name}`}
+                  title="Excluir item"
+                  className="shrink-0 cursor-pointer rounded-lg p-2 text-red-500 transition hover:bg-red-50 hover:text-red-700"
+                >
+                  <TrashIcon />
+                </button>
+              </div>
             ))}
           </div>
         ) : (
@@ -435,7 +469,87 @@ function MenuSection({
           </form>
         </div>
       )}
+
+      {isDeleteModalOpen && deletingItem && (
+        <div
+          className="fixed inset-0 z-30 grid place-items-center bg-slate-950/30 px-5"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setIsDeleteModalOpen(false)
+              setDeletingItem(null)
+            }
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-menu-item-title"
+            className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl sm:p-6"
+          >
+            <h3
+              id="delete-menu-item-title"
+              className="text-lg font-semibold text-slate-900"
+            >
+              Excluir item do menu?
+            </h3>
+            <p className="mt-2 text-sm text-slate-500">
+              O item <strong>{deletingItem.name}</strong> será removido
+              permanentemente.
+            </p>
+
+            {deleteMenuItem.error && (
+              <p className="mt-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {deleteMenuItem.error instanceof Error
+                  ? deleteMenuItem.error.message
+                  : 'Não foi possível excluir o item.'}
+              </p>
+            )}
+
+            <div className="mt-7 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsDeleteModalOpen(false)
+                  setDeletingItem(null)
+                }}
+                className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => deleteMenuItem.mutate()}
+                disabled={deleteMenuItem.isPending}
+                className="rounded-xl bg-red-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {deleteMenuItem.isPending ? 'Excluindo...' : 'Excluir item'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
+  )
+}
+
+function TrashIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      className="size-4"
+      aria-hidden="true"
+    >
+      <path d="M4.5 6.5h11M8 3.5h4l.7 3H7.3l.7-3Z" />
+      <path
+        d="m6 6.5.6 10h6.8l.6-10M8.5 9.5v4.5M11.5 9.5v4.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   )
 }
 
