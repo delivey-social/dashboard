@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { StoreIcon } from '#/components/dashboard/icons'
 import { EmptyState, ErrorBanner } from '#/components/dashboard/content'
 import { DashboardHeader, Sidebar } from '#/components/dashboard/layout'
@@ -41,7 +41,12 @@ function RestaurantsPage() {
                     : `${restaurants.length} restaurante${restaurants.length === 1 ? '' : 's'} registrado${restaurants.length === 1 ? '' : 's'}`}
                 </p>
               </div>
-              <StoreIcon />
+              <Link
+                to="/restaurates/manter"
+                className="rounded-xl bg-[#ff6048] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#e9513b]"
+              >
+                Novo restaurante
+              </Link>
             </div>
 
             {restaurantsQuery.isLoading ? (

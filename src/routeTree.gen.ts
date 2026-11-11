@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RestaurantesRouteImport } from './routes/restaurantes'
+import { Route as RestauratesManterRouteImport } from './routes/restaurates/manter'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const RestaurantesRoute = RestaurantesRouteImport.update({
   path: '/restaurantes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RestauratesManterRoute = RestauratesManterRouteImport.update({
+  id: '/restaurates/manter',
+  path: '/restaurates/manter',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/restaurantes': typeof RestaurantesRoute
+  '/restaurates/manter': typeof RestauratesManterRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/restaurantes': typeof RestaurantesRoute
+  '/restaurates/manter': typeof RestauratesManterRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/restaurantes': typeof RestaurantesRoute
+  '/restaurates/manter': typeof RestauratesManterRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/restaurantes'
+  fullPaths: '/' | '/restaurantes' | '/restaurates/manter'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/restaurantes'
-  id: '__root__' | '/' | '/restaurantes'
+  to: '/' | '/restaurantes' | '/restaurates/manter'
+  id: '__root__' | '/' | '/restaurantes' | '/restaurates/manter'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RestaurantesRoute: typeof RestaurantesRoute
+  RestauratesManterRoute: typeof RestauratesManterRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RestaurantesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/restaurates/manter': {
+      id: '/restaurates/manter'
+      path: '/restaurates/manter'
+      fullPath: '/restaurates/manter'
+      preLoaderRoute: typeof RestauratesManterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RestaurantesRoute: RestaurantesRoute,
+  RestauratesManterRoute: RestauratesManterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
