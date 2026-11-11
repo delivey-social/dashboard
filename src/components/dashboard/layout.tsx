@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { apiClient } from '#/api'
 import {
   BellIcon,
   GridIcon,
@@ -80,7 +81,16 @@ export function Sidebar() {
         </div>
       </div>
       <div className="border-t border-slate-100 px-5 py-4 text-xs text-slate-400">
-        Painel Comida
+        <div className="flex items-center justify-between gap-3">
+          <span>Painel Comida</span>
+          <button
+            type="button"
+            onClick={() => apiClient.logout()}
+            className="font-semibold text-slate-500 transition hover:text-[#e9513b]"
+          >
+            Sair
+          </button>
+        </div>
       </div>
     </aside>
   )
