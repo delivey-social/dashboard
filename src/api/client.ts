@@ -37,7 +37,9 @@ type RequestBody<TOperation> = TOperation extends {
 }
   ? Content extends { 'application/json': infer Body }
     ? Body
-    : never
+    : Content extends { 'multipart/form-data': unknown }
+      ? FormData
+      : never
   : never
 
 type ResponseBody<TOperation> = TOperation extends {
@@ -124,7 +126,7 @@ export class ApiClient {
     const hasBody = Object.hasOwn(requestOptions, 'body')
     const requestBody = Reflect.get(requestOptions, 'body')
 
-    if (hasBody) {
+    if (hasBody && !(requestBody instanceof FormData)) {
       headers.set('Content-Type', 'application/json')
     }
 
@@ -132,7 +134,12 @@ export class ApiClient {
       method: method.toUpperCase(),
       headers,
       signal: requestOptions.signal,
-      body: hasBody ? JSON.stringify(requestBody) : undefined,
+      body:
+        hasBody && requestBody instanceof FormData
+          ? requestBody
+          : hasBody
+            ? JSON.stringify(requestBody)
+            : undefined,
     })
 
     const responseBody = await this.parseResponseBody(response)
@@ -226,8 +233,7 @@ export class ApiClient {
       }),
     })
     const tokenBody = (await tokenResponse.json()) as
-      | TokenResponse
-      | { error: string }
+      TokenResponse | { error: string }
     if (!tokenResponse.ok || !('access_token' in tokenBody)) {
       throw new Error(
         `Authentication failed: ${'error' in tokenBody ? tokenBody.error : 'invalid token response'}.`,
@@ -294,6 +300,10 @@ export class ApiClient {
 
     if (contentType?.includes('application/json')) {
       return response.json()
+    }
+
+    if (contentType?.startsWith('image/')) {
+      return response.blob()
     }
 
     return response.text()

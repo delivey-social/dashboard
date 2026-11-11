@@ -23,24 +23,62 @@ function RestaurantFormPage() {
     enabled: isEditing,
   })
   const [name, setName] = useState('')
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
   useEffect(() => {
     if (restaurantQuery.data) {
       const restaurant = asRecord(restaurantQuery.data)
       setName(getString(restaurant, 'nome', 'name') ?? '')
     }
   }, [restaurantQuery.data])
-  const createRestaurant = useMutation({
-    mutationFn: () =>
-      isEditing
-        ? apiClient.request('/restaurante/{restaurante_id}', 'put', {
+  const logoQuery = useQuery({
+    queryKey: ['restaurant-logo', id],
+    queryFn: () =>
+      apiClient.request('/restaurante/{restaurante_id}/logo', 'get', {
+        path: { restaurante_id: id! },
+      }),
+    enabled: isEditing,
+  })
+  useEffect(() => {
+    if (!logoQuery.data) return
+    if (logoQuery.data instanceof Blob) {
+      const previewUrl = URL.createObjectURL(logoQuery.data)
+      setLogoPreview(previewUrl)
+      return () => URL.revokeObjectURL(previewUrl)
+    }
+    if (typeof logoQuery.data === 'string') setLogoPreview(logoQuery.data)
+  }, [logoQuery.data])
+  const saveRestaurant = useMutation({
+    mutationFn: async () => {
+      const response = isEditing
+        ? await apiClient.request('/restaurante/{restaurante_id}', 'put', {
             path: { restaurante_id: id! },
             body: { nome: name.trim() },
           })
-        : apiClient.request('/restaurante/', 'post', {
+        : await apiClient.request('/restaurante/', 'post', {
             body: { nome: name.trim() },
-          }),
+          })
+      const restaurantId =
+        id ?? getString(asRecord(response), 'id', 'restaurante_id')
+      if (logoFile && !restaurantId) {
+        throw new Error(
+          'O restaurante foi criado, mas seu ID não foi retornado.',
+        )
+      }
+      if (logoFile && restaurantId) {
+        const formData = new FormData()
+        formData.append('file', logoFile)
+        await apiClient.request('/restaurante/{restaurante_id}/logo', 'put', {
+          path: { restaurante_id: restaurantId },
+          body: formData,
+        })
+      }
+      return response
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['restaurants'] })
+      await queryClient.invalidateQueries({ queryKey: ['restaurant', id] })
+      await queryClient.invalidateQueries({ queryKey: ['restaurant-logo', id] })
       await navigate({ to: '/restaurantes' })
     },
   })
@@ -59,7 +97,7 @@ function RestaurantFormPage() {
     )
   }
 
-  const errorMessage = createRestaurant.error?.message ?? null
+  const errorMessage = saveRestaurant.error?.message ?? null
 
   return (
     <PageShell>
@@ -79,7 +117,7 @@ function RestaurantFormPage() {
         onSubmit={(event) => {
           event.preventDefault()
           if (!name.trim()) return
-          createRestaurant.mutate()
+          saveRestaurant.mutate()
         }}
         className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
       >
@@ -100,6 +138,31 @@ function RestaurantFormPage() {
             required
             className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#ff6048] focus:ring-2 focus:ring-orange-100"
           />
+          <label
+            htmlFor="restaurant-logo"
+            className="mt-5 block text-sm font-medium text-slate-700"
+          >
+            Logo do restaurante
+          </label>
+          {logoPreview && (
+            <img
+              src={logoPreview}
+              alt="Pré-visualização da logo"
+              className="mt-2 size-24 rounded-2xl border border-slate-200 object-cover"
+            />
+          )}
+          <input
+            id="restaurant-logo"
+            name="logo"
+            type="file"
+            accept="image/*"
+            onChange={(event) => {
+              const file = event.target.files?.[0] ?? null
+              setLogoFile(file)
+              if (file) setLogoPreview(URL.createObjectURL(file))
+            }}
+            className="mt-2 block w-full text-sm text-slate-500 file:mr-4 file:rounded-xl file:border-0 file:bg-orange-50 file:px-4 file:py-2.5 file:font-semibold file:text-orange-500 hover:file:bg-orange-100"
+          />
         </div>
 
         {errorMessage && (
@@ -117,10 +180,10 @@ function RestaurantFormPage() {
           </Link>
           <button
             type="submit"
-            disabled={createRestaurant.isPending || !name.trim()}
+            disabled={saveRestaurant.isPending || !name.trim()}
             className="rounded-xl bg-[#ff6048] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#e9513b] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {createRestaurant.isPending
+            {saveRestaurant.isPending
               ? 'Salvando...'
               : isEditing
                 ? 'Salvar alterações'
@@ -154,7 +217,9 @@ function asRecord(value: unknown): Record<string, unknown> {
 
 function getString(data: Record<string, unknown>, ...keys: string[]) {
   for (const key of keys) {
-    if (typeof data[key] === 'string') return data[key]
+    if (typeof data[key] === 'string' || typeof data[key] === 'number') {
+      return String(data[key])
+    }
   }
   return null
 }
