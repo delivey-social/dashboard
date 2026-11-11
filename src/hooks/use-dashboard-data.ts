@@ -35,9 +35,10 @@ function normalizeRestaurants(data: unknown): Restaurant[] {
   return getCollection(data, ['restaurantes', 'restaurants']).map(
     (item, index) => ({
       id: getString(item, 'id', 'restaurante_id') ?? `restaurant-${index}`,
-      name: getString(item, 'nome', 'name') ?? 'Unnamed restaurant',
+      name: getString(item, 'nome', 'name') ?? 'Restaurante sem nome',
       subtitle:
-        getString(item, 'cidade', 'address', 'email') ?? 'Connected restaurant',
+        getString(item, 'cidade', 'address', 'email') ??
+        'Restaurante conectado',
     }),
   )
 }
@@ -47,8 +48,8 @@ function normalizeOrders(data: unknown): Order[] {
     id: getString(item, 'id', 'pedido_id') ?? `order-${index}`,
     restaurant:
       getString(item, 'restaurant_name', 'restaurante_nome', 'restaurant_id') ??
-      'Restaurant',
-    status: getString(item, 'status', 'state') ?? 'Processing',
+      'Restaurante',
+    status: getString(item, 'status', 'state') ?? 'Em processamento',
     createdAt: getString(item, 'created_at', 'createdAt', 'data_criacao'),
     itemCount: getArray(item, 'items').length || null,
   }))

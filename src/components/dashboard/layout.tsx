@@ -19,13 +19,13 @@ export function DashboardHeader() {
         <span className="font-semibold">Comida</span>
       </div>
       <div className="hidden text-sm text-slate-500 sm:block">
-        Workspace <span className="mx-2 text-slate-300">/</span>{' '}
-        <span className="font-medium text-slate-900">Overview</span>
+        Espaço de trabalho <span className="mx-2 text-slate-300">/</span>{' '}
+        <span className="font-medium text-slate-900">Visão geral</span>
       </div>
       <div className="ml-auto flex items-center gap-3">
         <button
           className="grid size-9 place-items-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-50"
-          aria-label="Notifications"
+          aria-label="Notificações"
         >
           <BellIcon />
         </button>
@@ -50,37 +50,37 @@ export function Sidebar() {
       </div>
       <div className="flex flex-1 flex-col px-4 py-6">
         <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
-          Workspace
+          Espaço de trabalho
         </p>
         <nav className="space-y-1">
-          <NavItem icon={<GridIcon />} label="Overview" active />
-          <NavItem icon={<StoreIcon />} label="Restaurants" />
-          <NavItem icon={<ReceiptIcon />} label="Orders" />
+          <NavItem icon={<GridIcon />} label="Visão geral" active />
+          <NavItem icon={<StoreIcon />} label="Restaurantes" />
+          <NavItem icon={<ReceiptIcon />} label="Pedidos" />
         </nav>
         <p className="mb-3 mt-9 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
-          Manage
+          Gerenciar
         </p>
         <nav className="space-y-1">
-          <NavItem icon={<UsersIcon />} label="Customers" />
-          <NavItem icon={<SettingsIcon />} label="Settings" />
+          <NavItem icon={<UsersIcon />} label="Clientes" />
+          <NavItem icon={<SettingsIcon />} label="Configurações" />
         </nav>
         <div className="mt-auto rounded-2xl bg-[#fff3ef] p-4">
           <div className="mb-3 grid size-8 place-items-center rounded-lg bg-white text-[#ff6048]">
             <SparkIcon />
           </div>
           <p className="text-sm font-semibold text-slate-800">
-            Grow your network
+            Expanda sua rede
           </p>
           <p className="mt-1 text-xs leading-5 text-slate-500">
-            Invite more restaurants to join Comida.
+            Convide mais restaurantes para fazer parte da Comida.
           </p>
           <button className="mt-3 text-xs font-semibold text-[#e9513b]">
-            Invite a restaurant →
+            Convidar um restaurante →
           </button>
         </div>
       </div>
       <div className="border-t border-slate-100 px-5 py-4 text-xs text-slate-400">
-        Comida Dashboard
+        Painel Comida
       </div>
     </aside>
   )

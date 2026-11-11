@@ -67,7 +67,7 @@ function countActiveToday(orders: Order[]) {
 function getErrorMessage(error: unknown) {
   return error instanceof Error
     ? error.message
-    : 'Unable to load dashboard data.'
+    : 'Não foi possível carregar os dados do painel.'
 }
 
 function SummaryCardsArea() {
@@ -77,35 +77,35 @@ function SummaryCardsArea() {
   return (
     <section className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <MetricCard
-        label="Total restaurants"
+        label="Total de restaurantes"
         value={restaurantsQuery.isLoading ? '—' : restaurants.length.toString()}
-        detail="Registered in the network"
+        detail="Cadastrados na rede"
         icon={<StoreIcon />}
         accent="orange"
       />
 
       <MetricCard
-        label="Total orders"
+        label="Total de pedidos"
         value={ordersQuery.isLoading ? '—' : orders.length.toString()}
-        detail="All-time orders recorded"
+        detail="Todos os pedidos registrados"
         icon={<ReceiptIcon />}
         accent="blue"
       />
 
       <MetricCard
-        label="Active today"
+        label="Ativos hoje"
         value={
           ordersQuery.isLoading ? '—' : countActiveToday(orders).toString()
         }
-        detail="Orders placed today"
+        detail="Pedidos realizados hoje"
         icon={<PulseIcon />}
         accent="green"
       />
 
       <MetricCard
-        label="API status"
-        value={versionQuery.isLoading ? '—' : 'Operational'}
-        detail={`Version ${versionQuery.data ?? '—'}`}
+        label="Status da API"
+        value={versionQuery.isLoading ? '—' : 'Operacional'}
+        detail={`Versão ${versionQuery.data ?? '—'}`}
         icon={<CheckIcon />}
         accent="purple"
       />
