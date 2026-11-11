@@ -1,5 +1,8 @@
 import type { ReactNode } from 'react'
+import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
+import { apiClient } from '#/api'
 import { ReceiptIcon, StoreIcon } from './icons'
 import type { Order, Restaurant } from './types'
 
@@ -85,13 +88,13 @@ export function RestaurantsCard({
       ) : restaurants.length > 0 ? (
         <div className="mt-5 space-y-2">
           {restaurants.slice(0, 4).map((restaurant) => (
-            <div
+            <Link
               key={restaurant.id}
+              to="/restaurates/manter/{-$id}"
+              params={{ id: restaurant.id }}
               className="flex items-center gap-3 rounded-xl p-2 transition hover:bg-slate-50"
             >
-              <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#fff0ec] font-semibold text-[#e9513b]">
-                {restaurant.name.slice(0, 1).toUpperCase()}
-              </div>
+              <RestaurantLogo restaurant={restaurant} size="size-10" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-slate-800">
                   {restaurant.name}
@@ -101,7 +104,7 @@ export function RestaurantsCard({
                 </p>
               </div>
               <span className="size-2 rounded-full bg-emerald-400" />
-            </div>
+            </Link>
           ))}
         </div>
       ) : (
@@ -111,6 +114,49 @@ export function RestaurantsCard({
           message="Seus parceiros conectados aparecerão aqui."
           compact
         />
+      )}
+    </div>
+  )
+}
+
+function RestaurantLogo({
+  restaurant,
+  size,
+}: {
+  restaurant: Restaurant
+  size: string
+}) {
+  const logoQuery = useQuery({
+    queryKey: ['restaurant-logo', restaurant.id],
+    queryFn: () =>
+      apiClient.request('/restaurante/{restaurante_id}/logo', 'get', {
+        path: { restaurante_id: restaurant.id },
+      }),
+  })
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!logoQuery.data) return
+    if (logoQuery.data instanceof Blob) {
+      const url = URL.createObjectURL(logoQuery.data)
+      setLogoUrl(url)
+      return () => URL.revokeObjectURL(url)
+    }
+    if (typeof logoQuery.data === 'string') setLogoUrl(logoQuery.data)
+  }, [logoQuery.data])
+
+  return (
+    <div
+      className={`grid ${size} shrink-0 place-items-center overflow-hidden rounded-xl bg-[#fff0ec] font-semibold text-[#e9513b]`}
+    >
+      {logoUrl ? (
+        <img
+          src={logoUrl}
+          alt={`Logo de ${restaurant.name}`}
+          className="size-full object-cover"
+        />
+      ) : (
+        restaurant.name.slice(0, 1).toUpperCase()
       )}
     </div>
   )
