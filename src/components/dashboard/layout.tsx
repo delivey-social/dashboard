@@ -113,7 +113,11 @@ function NavItem({
 }) {
   const className =
     'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-500 transition hover:bg-slate-50 hover:text-slate-800'
-  const isActive = to ? window.location.pathname === to : false
+  const isActive = to
+    ? window.location.pathname === to ||
+      (to === '/restaurantes' &&
+        window.location.pathname.startsWith('/restaurates/manter'))
+    : false
 
   if (!to) {
     return (
