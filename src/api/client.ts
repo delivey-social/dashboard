@@ -74,13 +74,18 @@ export class ApiError extends Error {
 
 export class ApiClient {
   private readonly baseUrl: string
+  private readonly authUrl: string
 
   constructor(baseUrl = import.meta.env.VITE_API_URL) {
     if (!baseUrl) {
       throw new Error('VITE_API_URL is not configured.')
     }
+    if (!import.meta.env.VITE_AUTH_URL) {
+      throw new Error('VITE_AUTH_URL is not configured.')
+    }
 
     this.baseUrl = baseUrl.replace(/\/$/, '')
+    this.authUrl = import.meta.env.VITE_AUTH_URL.replace(/\/$/, '')
   }
 
   async request<TPath extends ApiPath, TMethod extends PathMethod<TPath>>(
@@ -110,11 +115,16 @@ export class ApiClient {
     const response = await fetch(url, {
       method: method.toUpperCase(),
       headers,
+      credentials: 'include',
       signal: requestOptions.signal,
       body: hasBody ? JSON.stringify(requestBody) : undefined,
     })
 
     const responseBody = await this.parseResponseBody(response)
+
+    if (response.status === 401) {
+      this.redirectToLogin()
+    }
 
     if (!response.ok) {
       throw new ApiError(
@@ -125,6 +135,12 @@ export class ApiClient {
     }
 
     return responseBody as ResponseBody<Operation<TPath, TMethod>>
+  }
+
+  private redirectToLogin(): void {
+    const loginUrl = new URL('/realms/master/account', this.authUrl)
+    loginUrl.searchParams.set('redirect_uri', window.location.href)
+    window.location.replace(loginUrl)
   }
 
   private replacePathParameters(
