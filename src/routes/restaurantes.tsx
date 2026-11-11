@@ -3,6 +3,9 @@ import { StoreIcon } from '#/components/dashboard/icons'
 import { EmptyState, ErrorBanner } from '#/components/dashboard/content'
 import { DashboardHeader, Sidebar } from '#/components/dashboard/layout'
 import { useDashboardData } from '#/hooks/use-dashboard-data'
+import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '#/api'
 
 export const Route = createFileRoute('/restaurantes')({
   component: RestaurantsPage,
@@ -61,25 +64,10 @@ function RestaurantsPage() {
             ) : restaurants.length > 0 ? (
               <div className="divide-y divide-slate-100">
                 {restaurants.map((restaurant) => (
-                  <Link
+                  <RestaurantListItem
                     key={restaurant.id}
-                    to="/restaurates/manter/{-$id}"
-                    params={{ id: restaurant.id }}
-                    className="flex items-center gap-3 px-5 py-4 transition hover:bg-slate-50 sm:px-6"
-                  >
-                    <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#fff0ec] font-semibold text-[#e9513b]">
-                      {restaurant.name.slice(0, 1).toUpperCase()}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-slate-800">
-                        {restaurant.name}
-                      </p>
-                      <p className="truncate text-xs text-slate-400">
-                        {restaurant.subtitle}
-                      </p>
-                    </div>
-                    <span className="size-2 rounded-full bg-emerald-400" />
-                  </Link>
+                    restaurant={restaurant}
+                  />
                 ))}
               </div>
             ) : (
@@ -93,6 +81,58 @@ function RestaurantsPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+function RestaurantListItem({
+  restaurant,
+}: {
+  restaurant: { id: string; name: string; subtitle: string }
+}) {
+  const logoQuery = useQuery({
+    queryKey: ['restaurant-logo', restaurant.id],
+    queryFn: () =>
+      apiClient.request('/restaurante/{restaurante_id}/logo', 'get', {
+        path: { restaurante_id: restaurant.id },
+      }),
+  })
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!logoQuery.data) return
+    if (logoQuery.data instanceof Blob) {
+      const url = URL.createObjectURL(logoQuery.data)
+      setLogoUrl(url)
+      return () => URL.revokeObjectURL(url)
+    }
+    if (typeof logoQuery.data === 'string') setLogoUrl(logoQuery.data)
+  }, [logoQuery.data])
+
+  return (
+    <Link
+      to="/restaurates/manter/{-$id}"
+      params={{ id: restaurant.id }}
+      className="flex items-center gap-3 px-5 py-4 transition hover:bg-slate-50 sm:px-6"
+    >
+      <div className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl bg-[#fff0ec] font-semibold text-[#e9513b]">
+        {logoUrl ? (
+          <img
+            src={logoUrl}
+            alt={`Logo de ${restaurant.name}`}
+            className="size-full object-cover"
+          />
+        ) : (
+          restaurant.name.slice(0, 1).toUpperCase()
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-slate-800">
+          {restaurant.name}
+        </p>
+        <p className="truncate text-xs text-slate-400">{restaurant.subtitle}</p>
+      </div>
+      <span className="size-2 rounded-full bg-emerald-400" />
+    </Link>
   )
 }
 

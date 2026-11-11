@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { apiClient } from '#/api'
+import { StoreIcon } from '#/components/dashboard/icons'
 import { DashboardHeader, Sidebar } from '#/components/dashboard/layout'
 
 export const Route = createFileRoute('/restaurates/manter/{-$id}')({
@@ -101,18 +102,6 @@ function RestaurantFormPage() {
 
   return (
     <PageShell>
-      <div className="mb-6">
-        <p className="text-sm font-medium text-[#e9513b]">Parceiros</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">
-          {isEditing ? 'Editar restaurante' : 'Novo restaurante'}
-        </h1>
-        <p className="mt-2 text-sm text-slate-500">
-          {isEditing
-            ? 'Atualize os dados do restaurante cadastrado.'
-            : 'Cadastre um restaurante para adicioná-lo à sua rede.'}
-        </p>
-      </div>
-
       <form
         onSubmit={(event) => {
           event.preventDefault()
@@ -121,6 +110,50 @@ function RestaurantFormPage() {
         }}
         className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
       >
+        <div className="mb-6">
+          <p className="text-sm font-medium text-[#e9513b]">Parceiros</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+            {isEditing ? 'Editar restaurante' : 'Novo restaurante'}
+          </h1>
+          <p className="mt-2 text-sm text-slate-500">
+            {isEditing
+              ? 'Atualize os dados do restaurante cadastrado.'
+              : 'Cadastre um restaurante para adicioná-lo à sua rede.'}
+          </p>
+        </div>
+
+        <div className="mb-6 flex flex-col items-center text-center">
+          <label
+            htmlFor="restaurant-logo"
+            className="grid size-28 cursor-pointer place-items-center overflow-hidden rounded-3xl border-2 border-dashed border-orange-200 bg-[#fff0ec] text-[#e9513b] transition hover:border-[#ff6048] hover:bg-orange-50"
+          >
+            {logoPreview ? (
+              <img
+                src={logoPreview}
+                alt="Pré-visualização da logo"
+                className="size-full object-cover"
+              />
+            ) : (
+              <StoreIcon />
+            )}
+          </label>
+          <input
+            id="restaurant-logo"
+            name="logo"
+            type="file"
+            accept="image/*"
+            onChange={(event) => {
+              const file = event.target.files?.[0] ?? null
+              setLogoFile(file)
+              if (file) setLogoPreview(URL.createObjectURL(file))
+            }}
+            className="sr-only"
+          />
+          <p className="mt-2 text-xs text-slate-400">
+            Clique para {logoPreview ? 'alterar a' : 'adicionar uma'} logo
+          </p>
+        </div>
+
         <div className="max-w-xl">
           <label
             htmlFor="restaurant-name"
@@ -137,31 +170,6 @@ function RestaurantFormPage() {
             placeholder="Ex.: Restaurante Comida"
             required
             className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#ff6048] focus:ring-2 focus:ring-orange-100"
-          />
-          <label
-            htmlFor="restaurant-logo"
-            className="mt-5 block text-sm font-medium text-slate-700"
-          >
-            Logo do restaurante
-          </label>
-          {logoPreview && (
-            <img
-              src={logoPreview}
-              alt="Pré-visualização da logo"
-              className="mt-2 size-24 rounded-2xl border border-slate-200 object-cover"
-            />
-          )}
-          <input
-            id="restaurant-logo"
-            name="logo"
-            type="file"
-            accept="image/*"
-            onChange={(event) => {
-              const file = event.target.files?.[0] ?? null
-              setLogoFile(file)
-              if (file) setLogoPreview(URL.createObjectURL(file))
-            }}
-            className="mt-2 block w-full text-sm text-slate-500 file:mr-4 file:rounded-xl file:border-0 file:bg-orange-50 file:px-4 file:py-2.5 file:font-semibold file:text-orange-500 hover:file:bg-orange-100"
           />
         </div>
 
