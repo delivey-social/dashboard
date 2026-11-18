@@ -6,7 +6,7 @@ import { apiClient } from '#/api'
 import { StoreIcon } from '#/components/dashboard/icons'
 import { DashboardHeader, Sidebar } from '#/components/dashboard/layout'
 
-export const Route = createFileRoute('/restaurates/manter/{-$id}')({
+export const Route = createFileRoute('/restaurantes/manter/{-$id}')({
   component: RestaurantFormPage,
 })
 

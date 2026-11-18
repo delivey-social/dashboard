@@ -90,7 +90,7 @@ export function RestaurantsCard({
           {restaurants.slice(0, 4).map((restaurant) => (
             <Link
               key={restaurant.id}
-              to="/restaurates/manter/{-$id}"
+              to="/restaurantes/manter/{-$id}"
               params={{ id: restaurant.id }}
               className="flex items-center gap-3 rounded-xl p-2 transition hover:bg-slate-50"
             >
