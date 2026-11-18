@@ -159,14 +159,7 @@ function OrderRow({
           {order.userId ? shortId(order.userId) : '—'}
         </td>
         <td className="px-6 py-4 text-slate-600">{order.itemCount ?? '—'}</td>
-        <td className="px-6 py-4 text-slate-600">
-          {order.total === null
-            ? '—'
-            : order.total.toLocaleString('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-              })}
-        </td>
+        <td className="px-6 py-4 text-slate-600">{formatCents(order.total)}</td>
         <td className="px-6 py-4">
           <span className="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600">
             {order.status}
@@ -269,6 +262,14 @@ function TrashIcon() {
 
 function shortId(id: string) {
   return id.length > 12 ? `${id.slice(0, 8)}...` : id
+}
+
+function formatCents(value: number | null) {
+  if (value === null) return '—'
+  return (value / 100).toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  })
 }
 
 function getErrorMessage(error: unknown) {
