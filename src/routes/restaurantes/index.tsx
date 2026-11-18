@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { StoreIcon } from '#/components/dashboard/icons'
 import { EmptyState, ErrorBanner } from '#/components/dashboard/content'
-import { DashboardHeader, Sidebar } from '#/components/dashboard/layout'
 import { useDashboardData } from '#/hooks/use-dashboard-data'
 import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -15,14 +14,8 @@ function RestaurantsPage() {
   const { restaurants, restaurantsQuery, error } = useDashboardData()
 
   return (
-    <div className="min-h-screen bg-[#f7f8fa] text-slate-950">
-      <Sidebar />
-
-      <main className="min-h-screen lg:pl-64">
-        <DashboardHeader />
-
-        <div className="mx-auto max-w-[1500px] px-5 py-7 sm:px-8 sm:py-9">
-          <div className="mb-6">
+    <>
+      <div className="mb-6">
             <p className="text-sm font-medium text-[#e9513b]">Parceiros</p>
             <h1 className="mt-1 text-2xl font-semibold tracking-tight">
               Restaurantes
@@ -34,7 +27,7 @@ function RestaurantsPage() {
 
           {error && <ErrorBanner message={getErrorMessage(error)} />}
 
-          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-5 sm:px-6">
               <div>
                 <h2 className="font-semibold">Restaurantes cadastrados</h2>
@@ -78,10 +71,8 @@ function RestaurantsPage() {
                 message="Os restaurantes cadastrados aparecerão aqui."
               />
             )}
-          </section>
-        </div>
-      </main>
-    </div>
+      </section>
+    </>
   )
 }
 

@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PedidosIndexRouteImport } from './routes/pedidos/index'
 import { Route as RestaurantesIndexRouteImport } from './routes/restaurantes/index'
+import { Route as PedidosManterChar123IdChar125RouteImport } from './routes/pedidos/manter.{-$id}'
 import { Route as RestaurantesManterChar123IdChar125RouteImport } from './routes/restaurantes/manter.{-$id}'
 
 const IndexRoute = IndexRouteImport.update({
@@ -18,11 +20,22 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PedidosIndexRoute = PedidosIndexRouteImport.update({
+  id: '/pedidos/',
+  path: '/pedidos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RestaurantesIndexRoute = RestaurantesIndexRouteImport.update({
   id: '/restaurantes/',
   path: '/restaurantes/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PedidosManterChar123IdChar125Route =
+  PedidosManterChar123IdChar125RouteImport.update({
+    id: '/pedidos/manter/{-$id}',
+    path: '/pedidos/manter/{-$id}',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const RestaurantesManterChar123IdChar125Route =
   RestaurantesManterChar123IdChar125RouteImport.update({
     id: '/restaurantes/manter/{-$id}',
@@ -32,31 +45,55 @@ const RestaurantesManterChar123IdChar125Route =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/pedidos/': typeof PedidosIndexRoute
   '/restaurantes/': typeof RestaurantesIndexRoute
+  '/pedidos/manter/{-$id}': typeof PedidosManterChar123IdChar125Route
   '/restaurantes/manter/{-$id}': typeof RestaurantesManterChar123IdChar125Route
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/pedidos': typeof PedidosIndexRoute
   '/restaurantes': typeof RestaurantesIndexRoute
+  '/pedidos/manter/{-$id}': typeof PedidosManterChar123IdChar125Route
   '/restaurantes/manter/{-$id}': typeof RestaurantesManterChar123IdChar125Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/pedidos/': typeof PedidosIndexRoute
   '/restaurantes/': typeof RestaurantesIndexRoute
+  '/pedidos/manter/{-$id}': typeof PedidosManterChar123IdChar125Route
   '/restaurantes/manter/{-$id}': typeof RestaurantesManterChar123IdChar125Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/restaurantes/' | '/restaurantes/manter/{-$id}'
+  fullPaths:
+    | '/'
+    | '/pedidos/'
+    | '/restaurantes/'
+    | '/pedidos/manter/{-$id}'
+    | '/restaurantes/manter/{-$id}'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/restaurantes' | '/restaurantes/manter/{-$id}'
-  id: '__root__' | '/' | '/restaurantes/' | '/restaurantes/manter/{-$id}'
+  to:
+    | '/'
+    | '/pedidos'
+    | '/restaurantes'
+    | '/pedidos/manter/{-$id}'
+    | '/restaurantes/manter/{-$id}'
+  id:
+    | '__root__'
+    | '/'
+    | '/pedidos/'
+    | '/restaurantes/'
+    | '/pedidos/manter/{-$id}'
+    | '/restaurantes/manter/{-$id}'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PedidosIndexRoute: typeof PedidosIndexRoute
   RestaurantesIndexRoute: typeof RestaurantesIndexRoute
+  PedidosManterChar123IdChar125Route: typeof PedidosManterChar123IdChar125Route
   RestaurantesManterChar123IdChar125Route: typeof RestaurantesManterChar123IdChar125Route
 }
 
@@ -69,11 +106,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pedidos/': {
+      id: '/pedidos/'
+      path: '/pedidos'
+      fullPath: '/pedidos/'
+      preLoaderRoute: typeof PedidosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/restaurantes/': {
       id: '/restaurantes/'
       path: '/restaurantes'
       fullPath: '/restaurantes/'
       preLoaderRoute: typeof RestaurantesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pedidos/manter/{-$id}': {
+      id: '/pedidos/manter/{-$id}'
+      path: '/pedidos/manter/{-$id}'
+      fullPath: '/pedidos/manter/{-$id}'
+      preLoaderRoute: typeof PedidosManterChar123IdChar125RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/restaurantes/manter/{-$id}': {
@@ -88,7 +139,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PedidosIndexRoute: PedidosIndexRoute,
   RestaurantesIndexRoute: RestaurantesIndexRoute,
+  PedidosManterChar123IdChar125Route: PedidosManterChar123IdChar125Route,
   RestaurantesManterChar123IdChar125Route:
     RestaurantesManterChar123IdChar125Route,
 }

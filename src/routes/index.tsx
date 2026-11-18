@@ -12,7 +12,6 @@ import {
   RecentOrders,
   RestaurantsCard,
 } from '#/components/dashboard/content'
-import { DashboardHeader, Sidebar } from '#/components/dashboard/layout'
 import { MetricCard } from '#/components/dashboard/metric-card'
 import { useDashboardData } from '#/hooks/use-dashboard-data'
 import type { Order } from '#/components/dashboard/types'
@@ -27,32 +26,24 @@ function Page() {
     useDashboardData()
 
   return (
-    <div className="min-h-screen bg-[#f7f8fa] text-slate-950">
-      <Sidebar />
+    <>
+      <UserGreeting />
 
-      <main className="min-h-screen lg:pl-64">
-        <DashboardHeader />
+      {error && <ErrorBanner message={getErrorMessage(error)} />}
 
-        <div className="mx-auto max-w-[1500px] px-5 py-7 sm:px-8 sm:py-9">
-          <UserGreeting />
+      <SummaryCardsArea />
 
-          {error && <ErrorBanner message={getErrorMessage(error)} />}
+      <section className="grid gap-6 xl:grid-cols-[1.45fr_1fr]">
+        <OrderChart orders={orders} loading={ordersQuery.isLoading} />
 
-          <SummaryCardsArea />
+        <RestaurantsCard
+          restaurants={restaurants}
+          loading={restaurantsQuery.isLoading}
+        />
+      </section>
 
-          <section className="grid gap-6 xl:grid-cols-[1.45fr_1fr]">
-            <OrderChart orders={orders} loading={ordersQuery.isLoading} />
-
-            <RestaurantsCard
-              restaurants={restaurants}
-              loading={restaurantsQuery.isLoading}
-            />
-          </section>
-
-          <RecentOrders orders={orders} />
-        </div>
-      </main>
-    </div>
+      <RecentOrders orders={orders} />
+    </>
   )
 }
 

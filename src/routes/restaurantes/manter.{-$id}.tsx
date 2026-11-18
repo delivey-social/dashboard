@@ -1,10 +1,8 @@
-import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { apiClient } from '#/api'
 import { StoreIcon } from '#/components/dashboard/icons'
-import { DashboardHeader, Sidebar } from '#/components/dashboard/layout'
 
 export const Route = createFileRoute('/restaurantes/manter/{-$id}')({
   component: RestaurantFormPage,
@@ -94,23 +92,21 @@ function RestaurantFormPage() {
   })
 
   if (isEditing && restaurantQuery.isLoading) {
-    return <PageShell>{null}</PageShell>
+    return null
   }
 
   if (isEditing && restaurantQuery.error) {
     return (
-      <PageShell>
-        <p className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Não foi possível carregar o restaurante.
-        </p>
-      </PageShell>
+      <p className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+        Não foi possível carregar o restaurante.
+      </p>
     )
   }
 
   const errorMessage = saveRestaurant.error?.message ?? null
 
   return (
-    <PageShell>
+    <section className="max-w-2xl mx-auto">
       <button
         type="button"
         onClick={() => window.history.back()}
@@ -223,7 +219,7 @@ function RestaurantFormPage() {
         available={isEditing}
         restaurantId={id}
       />
-    </PageShell>
+    </section>
   )
 }
 
@@ -557,20 +553,6 @@ function TrashIcon() {
         strokeLinejoin="round"
       />
     </svg>
-  )
-}
-
-function PageShell({ children }: { children: ReactNode }) {
-  return (
-    <div className="min-h-screen bg-[#f7f8fa] text-slate-950">
-      <Sidebar />
-      <main className="min-h-screen lg:pl-64">
-        <DashboardHeader />
-        <div className="mx-auto max-w-[900px] px-5 py-7 sm:px-8 sm:py-9">
-          {children}
-        </div>
-      </main>
-    </div>
   )
 }
 

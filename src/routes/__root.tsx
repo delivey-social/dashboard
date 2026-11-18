@@ -2,6 +2,7 @@ import { Outlet, createRootRoute } from '@tanstack/react-router'
 
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import { DashboardLayout } from '#/components/dashboard/layout'
 
 import '../styles.css'
 
@@ -12,7 +13,9 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <>
-      <Outlet />
+      <DashboardLayout>
+        <Outlet />
+      </DashboardLayout>
       <TanStackDevtools
         config={{
           position: 'bottom-right',

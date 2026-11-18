@@ -44,15 +44,37 @@ function normalizeRestaurants(data: unknown): Restaurant[] {
 }
 
 function normalizeOrders(data: unknown): Order[] {
-  return getCollection(data, ['pedidos', 'orders']).map((item, index) => ({
-    id: getString(item, 'id', 'pedido_id') ?? `order-${index}`,
-    restaurant:
-      getString(item, 'restaurant_name', 'restaurante_nome', 'restaurant_id') ??
-      'Restaurante',
-    status: getString(item, 'status', 'state') ?? 'Em processamento',
-    createdAt: getString(item, 'created_at', 'createdAt', 'data_criacao'),
-    itemCount: getArray(item, 'items').length || null,
-  }))
+  return getCollection(data, ['pedidos', 'orders']).map((item, index) => {
+    const items = getArray(item, 'items')
+    const itemCount = items.reduce((total, value) => {
+      if (!isRecord(value)) return total
+      const quantity = getNumber(value, 'quantity', 'quantidade')
+      return total + (quantity ?? 0)
+    }, 0)
+    const total = items.reduce((sum, value) => {
+      if (!isRecord(value)) return sum
+      const quantity = getNumber(value, 'quantity', 'quantidade') ?? 0
+      const price =
+        getNumber(value, 'price_snapshot', 'preco', 'price') ?? 0
+      return sum + quantity * price
+    }, 0)
+    const restaurantId =
+      getString(item, 'restaurant_id', 'restaurante_id') ?? null
+
+    return {
+      id: getString(item, 'id', 'pedido_id') ?? `order-${index}`,
+      restaurant:
+        getString(item, 'restaurant_name', 'restaurante_nome') ??
+        restaurantId ??
+        'Restaurante',
+      status: getString(item, 'status', 'state') ?? 'Recebido',
+      createdAt: getString(item, 'created_at', 'createdAt', 'data_criacao'),
+      itemCount: itemCount || null,
+      userId: getString(item, 'user_id', 'usuario_id'),
+      restaurantId,
+      total: items.length > 0 ? total : null,
+    }
+  })
 }
 
 function getCollection(data: unknown, keys: string[]): JsonRecord[] {
@@ -76,6 +98,18 @@ function getString(data: JsonRecord, ...keys: string[]): string | null {
 
 function getArray(data: JsonRecord, key: string): unknown[] {
   return Array.isArray(data[key]) ? data[key] : []
+}
+
+function getNumber(data: JsonRecord, ...keys: string[]): number | null {
+  for (const key of keys) {
+    const value = data[key]
+    if (typeof value === 'number') return value
+    if (typeof value === 'string' && value.trim()) {
+      const parsed = Number(value)
+      if (Number.isFinite(parsed)) return parsed
+    }
+  }
+  return null
 }
 
 function isRecord(value: unknown): value is JsonRecord {

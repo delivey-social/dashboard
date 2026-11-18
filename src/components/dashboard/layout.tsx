@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Link } from '@tanstack/react-router'
+import { Link, useLocation } from '@tanstack/react-router'
 import { apiClient } from '#/api'
 import {
   BellIcon,
@@ -11,6 +11,30 @@ import {
   UsersIcon,
 } from './icons'
 import clsx from 'clsx'
+
+export function DashboardLayout({ children }: { children: ReactNode }) {
+  const location = useLocation()
+  const isCompactPage =
+    location.pathname.startsWith('/restaurantes/manter/') ||
+    location.pathname.startsWith('/pedidos/manter/')
+
+  return (
+    <div className="min-h-screen bg-[#f7f8fa] text-slate-950">
+      <Sidebar />
+      <main className="min-h-screen lg:pl-64">
+        <DashboardHeader />
+        <div
+          className={clsx(
+            'mx-auto px-5 py-7 sm:px-8 sm:py-9',
+            isCompactPage ? 'max-w-[900px]' : 'max-w-[1500px]',
+          )}
+        >
+          {children}
+        </div>
+      </main>
+    </div>
+  )
+}
 
 export function DashboardHeader() {
   return (
@@ -62,7 +86,7 @@ export function Sidebar() {
             label="Restaurantes"
             to="/restaurantes"
           />
-          <NavItem icon={<ReceiptIcon />} label="Pedidos" />
+          <NavItem icon={<ReceiptIcon />} label="Pedidos" to="/pedidos" />
         </nav>
         <p className="mb-3 mt-9 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
           Gerenciar

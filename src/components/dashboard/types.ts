@@ -10,4 +10,7 @@ export type Order = {
   status: string
   createdAt: string | null
   itemCount: number | null
+  userId: string | null
+  restaurantId: string | null
+  total: number | null
 }
