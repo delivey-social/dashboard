@@ -1,5 +1,5 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ReceiptIcon } from '#/components/dashboard/icons'
+import { ChevronIcon } from '#/components/dashboard/icons'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { apiClient } from '#/api'
@@ -146,27 +146,32 @@ function RouteComponent() {
             >
               Restaurante
             </label>
-            <select
-              id="pedido-restaurant"
-              value={restaurantId}
-              onChange={(event) => {
-                setRestaurantId(event.target.value)
-                setQuantities({})
-              }}
-              required
-              className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#ff6048] focus:ring-2 focus:ring-orange-100"
-            >
-              <option value="">
-                {restaurantsQuery.isLoading
-                  ? 'Carregando restaurantes...'
-                  : 'Selecione um restaurante'}
-              </option>
-              {restaurants.map((restaurant) => (
-                <option key={restaurant.id} value={restaurant.id}>
-                  {restaurant.name}
+            <div className="relative mt-2">
+              <select
+                id="pedido-restaurant"
+                value={restaurantId}
+                onChange={(event) => {
+                  setRestaurantId(event.target.value)
+                  setQuantities({})
+                }}
+                required
+                className="w-full appearance-none rounded-xl border border-slate-200 px-4 py-3 pr-10 text-sm text-slate-900 outline-none transition focus:border-[#ff6048] focus:ring-2 focus:ring-orange-100"
+              >
+                <option value="">
+                  {restaurantsQuery.isLoading
+                    ? 'Carregando restaurantes...'
+                    : 'Selecione um restaurante'}
                 </option>
-              ))}
-            </select>
+                {restaurants.map((restaurant) => (
+                  <option key={restaurant.id} value={restaurant.id}>
+                    {restaurant.name}
+                  </option>
+                ))}
+              </select>
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-800">
+                <ChevronIcon />
+              </span>
+            </div>
           </div>
 
           <div>
@@ -176,16 +181,21 @@ function RouteComponent() {
             >
               Usuário
             </label>
-            <select
-              id="pedido-user"
-              value={userId ?? ''}
-              disabled
-              className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500"
-            >
-              <option value={userId ?? ''}>
-                {userId ? 'Usuário atual' : 'Usuário não identificado'}
-              </option>
-            </select>
+            <div className="relative mt-2">
+              <select
+                id="pedido-user"
+                value={userId ?? ''}
+                disabled
+                className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-500"
+              >
+                <option value={userId ?? ''}>
+                  {userId ? 'Usuário atual' : 'Usuário não identificado'}
+                </option>
+              </select>
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500">
+                <ChevronIcon />
+              </span>
+            </div>
           </div>
         </div>
 
@@ -197,22 +207,27 @@ function RouteComponent() {
             >
               Status
             </label>
-            <select
-              id="pedido-status"
-              value={status}
-              onChange={(event) => {
-                if (isOrderStatus(event.target.value)) {
-                  setStatus(event.target.value)
-                }
-              }}
-              className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#ff6048] focus:ring-2 focus:ring-orange-100"
-            >
-              {ORDER_STATUS_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <div className="relative mt-2">
+              <select
+                id="pedido-status"
+                value={status}
+                onChange={(event) => {
+                  if (isOrderStatus(event.target.value)) {
+                    setStatus(event.target.value)
+                  }
+                }}
+                className="w-full appearance-none rounded-xl border border-slate-200 px-4 py-3 pr-10 text-sm text-slate-900 outline-none transition focus:border-[#ff6048] focus:ring-2 focus:ring-orange-100"
+              >
+                {ORDER_STATUS_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-800">
+                <ChevronIcon />
+              </span>
+            </div>
           </div>
         )}
 
