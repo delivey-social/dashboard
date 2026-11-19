@@ -78,6 +78,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/menu/{restaurante_id}/{item_id}/image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Endpoint */
+        get: operations["endpoint_menu__restaurante_id___item_id__image_get"];
+        /** Endpoint */
+        put: operations["endpoint_menu__restaurante_id___item_id__image_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/restaurante/": {
         parameters: {
             query?: never;
@@ -222,6 +240,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** Body_endpoint_menu__restaurante_id___item_id__image_put */
+        Body_endpoint_menu__restaurante_id___item_id__image_put: {
+            /** File */
+            file: string[];
+        };
         /** Body_endpoint_restaurante__restaurante_id__logo_put */
         Body_endpoint_restaurante__restaurante_id__logo_put: {
             /** File */
@@ -601,6 +624,74 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    endpoint_menu__restaurante_id___item_id__image_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurante_id: string;
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    endpoint_menu__restaurante_id___item_id__image_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurante_id: string;
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_endpoint_menu__restaurante_id___item_id__image_put"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {

@@ -249,10 +249,12 @@ function MenuSection({
   const [deletingItem, setDeletingItem] = useState<MenuItem | null>(null)
   const [itemName, setItemName] = useState('')
   const [itemPrice, setItemPrice] = useState('')
+  const [itemImageFile, setItemImageFile] = useState<File | null>(null)
+  const [itemImagePreview, setItemImagePreview] = useState<string | null>(null)
   const createMenuItem = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       const body = { nome: itemName.trim(), preco: Number(itemPrice) }
-      return editingItem
+      const response = await (editingItem
         ? apiClient.request('/menu/{restaurante_id}/{item_id}', 'put', {
             path: {
               restaurante_id: restaurantId!,
@@ -263,7 +265,30 @@ function MenuSection({
         : apiClient.request('/menu/{restaurante_id}', 'post', {
             path: { restaurante_id: restaurantId! },
             body,
-          })
+          }))
+      const itemId =
+        editingItem?.id ??
+        getString(asRecord(asRecord(response).item), 'id', 'item_id') ??
+        getString(asRecord(response), 'id', 'item_id')
+      if (itemImageFile && !itemId) {
+        throw new Error('O item foi salvo, mas seu ID não foi retornado.')
+      }
+      if (itemImageFile && itemId) {
+        const formData = new FormData()
+        formData.append('file', itemImageFile)
+        await apiClient.request(
+          '/menu/{restaurante_id}/{item_id}/image',
+          'put',
+          {
+            path: {
+              restaurante_id: restaurantId!,
+              item_id: itemId,
+            },
+            body: formData,
+          },
+        )
+      }
+      return response
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
@@ -271,6 +296,8 @@ function MenuSection({
       })
       setItemName('')
       setItemPrice('')
+      setItemImageFile(null)
+      setItemImagePreview(null)
       setEditingItem(null)
       setIsModalOpen(false)
     },
@@ -343,10 +370,17 @@ function MenuSection({
                     setEditingItem(item)
                     setItemName(item.name)
                     setItemPrice(item.price)
+                    setItemImageFile(null)
+                    setItemImagePreview(null)
                     setIsModalOpen(true)
                   }}
                   className="flex min-w-0 flex-1 cursor-pointer items-center justify-between gap-4 text-left"
                 >
+                  <MenuItemImage
+                    restaurantId={restaurantId!}
+                    itemId={item.id}
+                    itemName={item.name}
+                  />
                   <p className="truncate text-sm font-medium text-slate-800">
                     {item.name}
                   </p>
@@ -402,8 +436,44 @@ function MenuSection({
             </p>
 
             <label
+              htmlFor="menu-item-image"
+              className="mt-6 flex cursor-pointer items-center gap-4 rounded-xl border border-dashed border-orange-200 bg-[#fffaf8] p-3 transition hover:border-[#ff6048]"
+            >
+              <span className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-xl bg-[#fff0ec] text-[#e9513b]">
+                {itemImagePreview ? (
+                  <img
+                    src={itemImagePreview}
+                    alt="Pré-visualização do item"
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  <ImageIcon />
+                )}
+              </span>
+              <span>
+                <span className="block text-sm font-medium text-slate-700">
+                  Imagem do item
+                </span>
+                <span className="mt-1 block text-xs text-slate-400">
+                  Clique para {itemImagePreview ? 'alterar' : 'adicionar'}
+                </span>
+              </span>
+            </label>
+            <input
+              id="menu-item-image"
+              type="file"
+              accept="image/*"
+              onChange={(event) => {
+                const file = event.target.files?.[0] ?? null
+                setItemImageFile(file)
+                setItemImagePreview(file ? URL.createObjectURL(file) : null)
+              }}
+              className="sr-only"
+            />
+
+            <label
               htmlFor="menu-item-name"
-              className="mt-6 block text-sm font-medium text-slate-700"
+              className="mt-4 block text-sm font-medium text-slate-700"
             >
               Nome do item
             </label>
@@ -450,6 +520,8 @@ function MenuSection({
                   setEditingItem(null)
                   setItemName('')
                   setItemPrice('')
+                  setItemImageFile(null)
+                  setItemImagePreview(null)
                 }}
                 className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
               >
@@ -533,6 +605,67 @@ function MenuSection({
         </div>
       )}
     </>
+  )
+}
+
+function MenuItemImage({
+  restaurantId,
+  itemId,
+  itemName,
+}: {
+  restaurantId: string
+  itemId: string
+  itemName: string
+}) {
+  const imageQuery = useQuery({
+    queryKey: ['menu-item-image', restaurantId, itemId],
+    queryFn: () =>
+      apiClient.request('/menu/{restaurante_id}/{item_id}/image', 'get', {
+        path: { restaurante_id: restaurantId, item_id: itemId },
+      }),
+  })
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!(imageQuery.data instanceof Blob)) {
+      setImageUrl(null)
+      return
+    }
+
+    const url = URL.createObjectURL(imageQuery.data)
+    setImageUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [imageQuery.data])
+
+  return (
+    <span className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-[#fff0ec] text-[#e9513b]">
+      {imageUrl ? (
+        <img
+          src={imageUrl}
+          alt={`Imagem de ${itemName}`}
+          className="size-full object-cover"
+        />
+      ) : (
+        <ImageIcon />
+      )}
+    </span>
+  )
+}
+
+function ImageIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      className="size-5"
+      aria-hidden="true"
+    >
+      <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
+      <circle cx="8.5" cy="9" r="1.5" />
+      <path d="m4.5 17 4.5-4 3 2.5 2-2 5.5 4.5" />
+    </svg>
   )
 }
 
