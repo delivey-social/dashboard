@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { apiClient } from '#/api'
 import { ReceiptIcon, StoreIcon } from './icons'
+import { getOrderStatusLabel, getOrderStatusStyles } from './order-status'
 import type { Order, Restaurant } from './types'
 
 export function OrderChart({
@@ -260,19 +261,11 @@ export function ErrorBanner({ message }: { message: string }) {
 }
 
 function StatusPill({ status }: { status: string }) {
-  const normalized = status.toLowerCase()
-  const isPositive = [
-    'completed',
-    'complete',
-    'delivered',
-    'paid',
-    'success',
-  ].some((word) => normalized.includes(word))
   return (
     <span
-      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${isPositive ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}
+      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getOrderStatusStyles(status)}`}
     >
-      {status}
+      {getOrderStatusLabel(status)}
     </span>
   )
 }

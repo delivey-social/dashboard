@@ -292,6 +292,11 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /**
+         * PedidoStatus
+         * @enum {string}
+         */
+        PedidoStatus: "pending" | "confirmed" | "delivering" | "delivered" | "canceled";
         /** UpdatePedidoRequest */
         UpdatePedidoRequest: {
             /**
@@ -306,6 +311,7 @@ export interface components {
             restaurant_id: string;
             /** Items */
             items: components["schemas"]["CreatePedidoRequestItem"][];
+            status: components["schemas"]["PedidoStatus"];
         };
         /** ValidationError */
         ValidationError: {

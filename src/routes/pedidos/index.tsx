@@ -1,6 +1,10 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { EmptyState, ErrorBanner } from '#/components/dashboard/content'
 import { ReceiptIcon } from '#/components/dashboard/icons'
+import {
+  getOrderStatusLabel,
+  getOrderStatusStyles,
+} from '#/components/dashboard/order-status'
 import type { Order } from '#/components/dashboard/types'
 import { useDashboardData } from '#/hooks/use-dashboard-data'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -161,8 +165,10 @@ function OrderRow({
         <td className="px-6 py-4 text-slate-600">{order.itemCount ?? '—'}</td>
         <td className="px-6 py-4 text-slate-600">{formatCents(order.total)}</td>
         <td className="px-6 py-4">
-          <span className="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600">
-            {order.status}
+          <span
+            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getOrderStatusStyles(order.status)}`}
+          >
+            {getOrderStatusLabel(order.status)}
           </span>
         </td>
         <td className="px-6 py-4 text-right">

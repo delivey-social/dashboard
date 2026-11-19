@@ -3,6 +3,11 @@ import { ReceiptIcon } from '#/components/dashboard/icons'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { apiClient } from '#/api'
+import {
+  isOrderStatus,
+  ORDER_STATUS_OPTIONS,
+} from '#/components/dashboard/order-status'
+import type { OrderStatus } from '#/components/dashboard/order-status'
 import { useDashboardData } from '#/hooks/use-dashboard-data'
 
 export const Route = createFileRoute('/pedidos/manter/{-$id}')({
@@ -17,6 +22,7 @@ function RouteComponent() {
   const { restaurants, restaurantsQuery } = useDashboardData()
   const [restaurantId, setRestaurantId] = useState('')
   const [quantities, setQuantities] = useState<Record<string, number>>({})
+  const [status, setStatus] = useState<OrderStatus>('pending')
   const userId = getCurrentUserId()
 
   const pedidoQuery = useQuery({
@@ -37,6 +43,8 @@ function RouteComponent() {
       'restaurante_id',
     )
     if (selectedRestaurantId) setRestaurantId(selectedRestaurantId)
+    const selectedStatus = getString(pedido, 'status')
+    if (isOrderStatus(selectedStatus)) setStatus(selectedStatus)
 
     const selectedQuantities: Record<string, number> = {}
     const items = asArray(pedido.items)
@@ -75,7 +83,7 @@ function RouteComponent() {
       return isEditing
         ? apiClient.request('/pedido/{pedido_id}', 'put', {
             path: { pedido_id: id! },
-            body,
+            body: { ...body, status },
           })
         : apiClient.request('/pedido/', 'post', { body })
     },
@@ -180,6 +188,33 @@ function RouteComponent() {
             </select>
           </div>
         </div>
+
+        {isEditing && (
+          <div className="mt-5">
+            <label
+              htmlFor="pedido-status"
+              className="text-sm font-medium text-slate-700"
+            >
+              Status
+            </label>
+            <select
+              id="pedido-status"
+              value={status}
+              onChange={(event) => {
+                if (isOrderStatus(event.target.value)) {
+                  setStatus(event.target.value)
+                }
+              }}
+              className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#ff6048] focus:ring-2 focus:ring-orange-100"
+            >
+              {ORDER_STATUS_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200">
           <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
